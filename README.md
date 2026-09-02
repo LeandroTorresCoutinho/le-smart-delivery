@@ -1,4 +1,4 @@
-# Smart Delivery Orchestrator
+# LeSmartDelivery
 
 > A resilient delivery-option platform for restaurants, built with Java, Spring Boot, Resilience4j, and Google Kubernetes Engine (GKE).
 
@@ -6,7 +6,7 @@
 
 Restaurants often depend on multiple delivery partners. A provider may be slow, temporarily unavailable, return no drivers, or fail after accepting a delivery request. The restaurant should still be able to offer delivery when one partner has a problem.
 
-Smart Delivery Orchestrator requests quotes from several delivery providers, compares their price, ETA, and reliability, and recommends the best currently available option. Provider failures are isolated so that one unhealthy dependency does not make the whole platform unavailable.
+LeSmartDelivery requests quotes from several delivery providers, compares their price, ETA, and reliability, and recommends the best currently available option. Provider failures are isolated so that one unhealthy dependency does not make the whole platform unavailable.
 
 The project is designed to demonstrate a practical relationship between:
 
@@ -182,7 +182,7 @@ PostgreSQL, Redis, and Pub/Sub are intentionally postponed until the core resili
 ## Proposed repository structure
 
 ```text
-smart-delivery-orchestrator/
+LeSmartDelivery/
 ├── delivery-orchestrator/
 │   ├── src/main/java/
 │   ├── src/test/java/

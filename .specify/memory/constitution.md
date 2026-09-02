@@ -13,7 +13,7 @@ Sync Impact Report
 - Removed sections: none
 - Follow-up TODOs: none
 -->
-# Smart Delivery Orchestrator Constitution
+# LeSmartDelivery Constitution
 
 ## Core Principles
 
