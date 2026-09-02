@@ -1,17 +1,15 @@
 <!--
 Sync Impact Report
-- Version change: template (unversioned) -> 1.0.0
-- Modified principles:
-  - Placeholder Principle 1 -> I. Useful Results Through Partial Success
-  - Placeholder Principle 2 -> II. Provider Isolation and Explicit Resilience
-  - Placeholder Principle 3 -> III. Safe Retries and Idempotent Dispatch
-  - Placeholder Principle 4 -> IV. Domain Independence and Bounded Concurrency
-  - Placeholder Principle 5 -> V. Observable Behavior Proven by Tests
-- Added sections:
-  - Technical and Product Constraints
-  - Development Workflow and Quality Gates
+- Version change: 1.0.0 -> 2.0.0
+- Modified principles: none
+- Modified sections:
+  - Technical and Product Constraints: retained Java 26 and replaced the mandatory
+    Spring Boot 3 generation with Spring Boot 4.1.x for official Java 26 compatibility
+  - Governance metadata: incremented the constitution version for the breaking stack mandate
+- Added sections: none
 - Removed sections: none
-- Follow-up TODOs: none
+- Follow-up TODOs:
+  - Re-run or reconcile existing feature plans and research that reference Spring Boot 3.5.x
 -->
 # LeSmartDelivery Constitution
 
@@ -66,9 +64,9 @@ is non-negotiable because resilience that cannot be observed and reproduced cann
 
 ## Technical and Product Constraints
 
-- The initial platform MUST use Java 26, Spring Boot 3, Maven, Resilience4j, Actuator, Micrometer,
-  Docker Compose, Kubernetes, GKE Autopilot, Terraform, GitHub Actions, Managed Prometheus, Grafana,
-  and Cloud Logging unless an approved amendment changes the stack.
+- The initial platform MUST use Java 26, Spring Boot 4.1.x, Maven, Resilience4j, Actuator,
+  Micrometer, Docker Compose, Kubernetes, GKE Autopilot, Terraform, GitHub Actions, Managed
+  Prometheus, Grafana, and Cloud Logging unless an approved amendment changes the stack.
 - The MVP MUST remain limited to the orchestrator, one reusable simulator deployed as three
   providers, concurrent quote aggregation, provider-specific resilience, configurable scoring,
   health and resilience telemetry, automated tests, local Compose execution, and GKE deployment.
@@ -128,4 +126,4 @@ the maintainer MUST audit the release evidence against all principles and the MV
 Unapproved exceptions are governance violations and MUST block merge or release until corrected or
 ratified through an amendment.
 
-**Version**: 1.0.0 | **Ratified**: 2026-09-01 | **Last Amended**: 2026-09-01
+**Version**: 2.0.0 | **Ratified**: 2026-09-01 | **Last Amended**: 2026-09-01
