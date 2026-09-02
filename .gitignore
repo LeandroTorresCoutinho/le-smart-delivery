@@ -1,0 +1,14 @@
+# IDE and operating-system files
+.idea/
+*.iml
+.DS_Store
+
+# Java and Maven build output
+target/
+*.class
+
+# Logs and local runtime configuration
+*.log
+.env
+.env.*
+!.env.example
