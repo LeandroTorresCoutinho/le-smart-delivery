@@ -34,11 +34,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository/org/owasp/dependency-check-data
-          key: dependency-check-data-${{ runner.os }}
+          key: dependency-check-data-${{ runner.os }}-12.2.2-feed-v1
 
       - name: Verify unit, integration, formatting, static-analysis, and dependency gates
-        env:
-          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
         run: ./mvnw --batch-mode --no-transfer-progress clean verify
 
       - name: Build orchestrator image without publishing
