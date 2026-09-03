@@ -27,6 +27,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <resilience4j.version>2.4.0</resilience4j.version>
+    <tomcat.version>11.0.25</tomcat.version>
     <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <spotless-maven-plugin.version>3.4.0</spotless-maven-plugin.version>
