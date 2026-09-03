@@ -10,9 +10,9 @@ Build the first successful delivery-options flow as two Maven-built Spring Boot 
 
 ## Technical Context
 
-**Language/Version**: Java 26 without preview features; Spring Boot 3.5.16. This pairing is constitution-mandated but officially supported by Spring Boot only through Java 25, so the minimal build and runtime compatibility proof defined in [research.md](research.md) is the first implementation gate.
+**Language/Version**: Java 26 without preview features; Spring Boot 4.1.1. This constitution-mandated pairing is supported by the selected Spring Boot generation and remains subject to the governed-stack smoke gate defined in [research.md](research.md).
 
-**Primary Dependencies**: Spring Web MVC and `RestClient`, Jakarta Validation, Spring Boot Actuator, Micrometer Prometheus, Resilience4j Spring Boot 3 integration and AOP, Jackson, and Apache Maven 3.9.x through the Maven Wrapper. Maven Enforcer, static analysis, formatting, and dependency-vulnerability plugins participate in `verify`.
+**Primary Dependencies**: Spring Web MVC and `RestClient`, Jakarta Validation, Spring Boot Actuator, Micrometer Prometheus, `io.github.resilience4j:resilience4j-spring-boot4:2.4.0` and AOP, Jackson, and Apache Maven 3.9.x through the Maven Wrapper. Maven Enforcer, static analysis, formatting, and dependency-vulnerability plugins participate in `verify`.
 
 **Storage**: None. Requests, quotes, and ranking results are request-scoped; ranking weights, provider metadata, provider endpoints, reliability values, timeouts, and bounded execution settings are external configuration.
 
@@ -41,11 +41,11 @@ Build the first successful delivery-options flow as two Maven-built Spring Boot 
 | III. Safe Retries and Idempotent Dispatch | PASS | This feature implements quote requests only, defines no retry, and adds no delivery creation or dispatch. No implicit HTTP retries are permitted.                                                                                                                                        |
 | IV. Domain Independence and Bounded Concurrency | PASS | Provider DTOs remain inside adapters; scoring consumes provider-neutral quotes; weights are validated configuration; each provider call uses independently bounded execution.                                                                                                            |
 | V. Observable Behavior Proven by Tests | PASS for the successful-flow slice | Unit, contract, integration, concurrency, configuration, log, metric, and end-to-end checks cover validation, normalization, scoring, ordering, recommendation, and correlation. The full resilience matrix remains feature 002's release obligation.                                    |
-| Mandated stack and MVP boundary | PASS with explicit compatibility risk | Java 26, Spring Boot 3, Maven, Resilience4j, Actuator, Micrometer, Compose, reusable simulator, and three providers are retained. No deferred database, messaging, UI, authentication, or real integrations are introduced.                                                              |
+| Mandated stack and MVP boundary | PASS | Java 26, Spring Boot 4.1.x, Maven, Resilience4j, Actuator, Micrometer, Compose, reusable simulator, and three providers are retained. No deferred database, messaging, UI, authentication, or real integrations are introduced.                                                              |
 | Public/internal exposure | PASS | The public contract belongs only to the orchestrator. Provider quote and future administration interfaces remain internal.                                                                                                                                                               |
 | Development quality gates | PASS by plan | Root `verify` covers all modules, unit/integration checks, static analysis, formatting, and dependency checks; images must build in PR validation.                                                                                                                                       |
 
-No constitution violation is accepted. The Java 26/Spring Boot 3 support mismatch is handled as a mandatory compatibility proof, not by silently changing the governed stack. If that proof fails, implementation stops pending a constitution amendment.
+No constitution violation is accepted. The Java 26/Spring Boot 4.1.x stack is validated by a mandatory compile, context-startup, integration, and container smoke gate before feature behavior is considered complete.
 
 ## Project Structure
 
@@ -115,7 +115,7 @@ compose.yaml
 
 All technical unknowns are resolved in [research.md](research.md). The decisive choices are:
 
-1. Retain Java 26 with Spring Boot 3.5.16 under a mandatory first-task compatibility gate.
+1. Use Java 26 with Spring Boot 4.1.1 under a mandatory governed-stack smoke gate.
 2. Use two Maven modules and no shared provider-contract module.
 3. Use one synchronous `RestClient` and one bounded `ThreadPoolBulkhead` per provider.
 4. Use validated immutable configuration for provider metadata, execution bounds, currency, reliability, and ranking weights.
@@ -139,6 +139,6 @@ All technical unknowns are resolved in [research.md](research.md). The decisive 
 | Retries and dispatch remain safe | PASS | Neither contract defines dispatch; no retry behavior is introduced. |
 | Domain independence and bounded concurrency are explicit | PASS | Ranking has no HTTP types, provider IDs are trusted configuration, and executor/bulkhead values are finite validated settings. |
 | Observable behavior is testable | PASS | Quickstart and test plan validate provider fan-out, no calls on invalid input, exact ordering, recommendation, correlation, JSON logs, bounded metrics, and end-to-end latency. |
-| MVP scope and governed stack are preserved | PASS with tracked compatibility risk | No prohibited storage or product capability appears. Compatibility proof and amendment fallback are explicit. |
+| MVP scope and governed stack are preserved | PASS | No prohibited storage or product capability appears. Java 26 and Spring Boot 4.1.x match constitution 2.0.0 and are covered by an explicit smoke gate. |
 
 Phase 1 introduces no new constitution violations. Production release remains blocked on feature 002's resilience implementation and test evidence, as required by the constitution rather than by this feature's successful-flow scope.

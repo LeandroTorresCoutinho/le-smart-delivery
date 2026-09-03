@@ -2,19 +2,19 @@
 
 ## 1. Governed Java and Spring Boot Pairing
 
-**Decision**: Use Java 26 without preview features and pin Spring Boot 3.5.16, as required by the constitution. Make a minimal two-application compatibility proof the first implementation gate: compile, test, start both applications on Linux/JDK 26, and verify application context creation, JSON serialization, validation, Actuator health, `RestClient`, Micrometer, and Resilience4j configuration/registry creation in local and CI environments.
+**Decision**: Use Java 26 without preview features and pin Spring Boot 4.1.1, as required by constitution 2.0.0. Pin `io.github.resilience4j:resilience4j-spring-boot4:2.4.0` explicitly because its version is not supplied completely by Spring Boot dependency management. Make a two-application smoke proof the first implementation gate: compile, test, start both applications on Linux/JDK 26, and verify application context creation, JSON serialization, validation, Actuator health, `RestClient`, Micrometer, and Resilience4j configuration/registry creation in local and CI environments.
 
-**Rationale**: Spring Boot 3.5.16 officially supports Java only through 25, while current Spring Boot 4 supports Java 26. The constitution nonetheless mandates Java 26 and Spring Boot 3, and governance forbids silently changing either. A compatibility proof establishes empirical operability while making clear that it does not create official vendor support.
+**Rationale**: Spring Boot 4.1.x is the constitution-approved generation for Java 26. Version 4.1.1 is the latest stable 4.1.x release published when the build was bootstrapped, while the Boot-specific Resilience4j 2.4.0 integration preserves the intended auto-configuration boundary.
 
 **Alternatives considered**:
 
-- Java 25 with Spring Boot 3.5.16 is officially supported but requires a constitution amendment.
-- Java 26 with Spring Boot 4.1.x is officially supported but requires a constitution amendment.
-- Compiling with `--release 25` on JDK 26 does not make the Java 26 runtime an officially supported Boot 3 configuration.
+- Java 25 with Spring Boot 3.5.x conflicts with the governed Java 26 and Spring Boot 4.1.x stack.
+- Java 26 with Spring Boot 4.0.x is compatible but does not satisfy the constitution's 4.1.x requirement.
+- Relying on a Spring Boot BOM entry for the Boot 4 Resilience4j adapter can leave the integration unversioned, so the build owns the explicit 2.4.0 pin.
 
-**Sources**: [Spring Boot 3.5 system requirements](https://docs.spring.io/spring-boot/3.5/system-requirements.html), [current Spring Boot system requirements](https://docs.spring.io/spring-boot/system-requirements.html)
+**Sources**: [Spring Boot 4.1 system requirements](https://docs.spring.io/spring-boot/4.1/system-requirements.html), [Maven Central Spring Boot metadata](https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-starter-parent/maven-metadata.xml), [Maven Central Resilience4j Boot 4 metadata](https://repo.maven.apache.org/maven2/io/github/resilience4j/resilience4j-spring-boot4/maven-metadata.xml)
 
-**Implementation consequence**: Stop feature implementation if the compatibility gate reveals linkage, instrumentation, build-plugin, or runtime incompatibility. The next action is a proposed constitution amendment, not a silent version substitution.
+**Implementation consequence**: Stop feature implementation if the smoke gate reveals linkage, instrumentation, build-plugin, or runtime incompatibility. Any version substitution requires an explicit plan and governance update rather than an undocumented downgrade.
 
 ## 2. Maven Reactor and Deployable Boundaries
 
@@ -44,7 +44,7 @@
 - OpenFeign adds another compatibility surface and obscures some client construction details.
 - `RestTemplate` is an older API than `RestClient`.
 
-**Sources**: [Spring REST clients reference](https://docs.spring.io/spring-framework/reference/integration/rest-clients.html), [Resilience4j Spring Boot 3 guide](https://resilience4j.readme.io/docs/getting-started-3), [Oracle virtual-thread guidance](https://docs.oracle.com/en/java/javase/26/core/virtual-threads.html)
+**Sources**: [Spring REST clients reference](https://docs.spring.io/spring-framework/reference/integration/rest-clients.html), [Resilience4j Spring Boot 4 module](https://github.com/resilience4j/resilience4j/tree/master/resilience4j-spring-boot4), [Oracle virtual-thread guidance](https://docs.oracle.com/en/java/javase/26/core/virtual-threads.html)
 
 ## 4. Externalized and Validated Configuration
 
@@ -147,7 +147,7 @@ Measure SC-005 after 20 warm-up calls with 200 valid measured requests at concur
 - JMH measures code paths rather than the restaurant-visible operation.
 - Single-stopwatch assertions are noisy and provide no percentile evidence.
 
-**Source**: [Spring Boot application testing](https://docs.spring.io/spring-boot/3.5/reference/testing/spring-boot-applications.html)
+**Source**: [Spring Boot application testing](https://docs.spring.io/spring-boot/4.1/reference/testing/spring-boot-applications.html)
 
 ## 10. Observability for the Successful Slice
 

@@ -13,7 +13,7 @@ The repository supplies Maven through `./mvnw`; no global Maven installation is 
 
 ## 1. Prove the Governed Stack First
 
-The constitution requires Java 26 with Spring Boot 3, but Spring Boot 3.5.16 officially lists compatibility only through Java 25. Before feature implementation proceeds beyond the skeleton, run the mandatory compatibility gate:
+The constitution requires Java 26 with Spring Boot 4.1.x. The build pins Spring Boot 4.1.1 and `resilience4j-spring-boot4:2.4.0`; before feature implementation proceeds beyond the skeleton, run the mandatory governed-stack gate:
 
 ```bash
 java -version
@@ -31,7 +31,7 @@ The gate passes only when all of the following work on local Linux-container bui
 - Resilience4j provider registries and validated configuration initialize;
 - no linkage, class-version, agent, or build-plugin incompatibility occurs.
 
-If the gate fails, stop. Do not change Java or Spring Boot silently; propose the amendment options documented in [research.md](research.md).
+If the gate fails, stop. Do not change Java, Spring Boot, or the Resilience4j Boot integration silently; document the failure and reconcile the governed stack as described in [research.md](research.md).
 
 ## 2. Run Automated Verification
 
