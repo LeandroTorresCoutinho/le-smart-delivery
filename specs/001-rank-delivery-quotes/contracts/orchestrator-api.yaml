@@ -1,0 +1,319 @@
+openapi: 3.1.0
+info:
+  title: LeSmartDelivery Orchestrator API
+  version: 1.0.0
+  description: >-
+    Public restaurant-facing contract for the complete successful delivery-options
+    flow defined by feature 001-rank-delivery-quotes.
+servers:
+  - url: http://localhost:8080
+    description: Local Docker Compose environment
+paths:
+  /api/v1/delivery-options:
+    post:
+      operationId: requestDeliveryOptions
+      summary: Return complete ranked delivery quotes
+      description: >-
+        Validates an order, requests one quote from every active configured
+        provider, and returns all successful quotes in deterministic rank order.
+        This feature's 200 response is complete; partial and total-provider-failure
+        behavior belongs to feature 002-provider-failure-isolation.
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeliveryOptionsRequest'
+            examples:
+              rioOrder:
+                value:
+                  restaurantId: restaurant-123
+                  orderId: order-93821
+                  orderValue: 89.90
+                  pickup:
+                    latitude: -22.9068
+                    longitude: -43.1729
+                  destination:
+                    latitude: -22.9519
+                    longitude: -43.2105
+      responses:
+        '200':
+          description: Complete ranked delivery options from every active provider
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompleteDeliveryOptionsResult'
+              examples:
+                completeResult:
+                  value:
+                    correlationId: 7743bd70-52d1-4ef2-99dc-1b74d23c8975
+                    currency: BRL
+                    options:
+                      - provider: MOTO_EXPRESS
+                        fee: 12.90
+                        estimatedMinutes: 28
+                        score: 91.40
+                      - provider: CITY_COURIER
+                        fee: 8.90
+                        estimatedMinutes: 45
+                        score: 78.20
+                      - provider: FLASH_DELIVERY
+                        fee: 10.50
+                        estimatedMinutes: 38
+                        score: 74.15
+                    recommendedProvider: MOTO_EXPRESS
+                    unavailableProviders: []
+                    partialResult: false
+        '400':
+          description: The request header or body is invalid; no provider was contacted
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ValidationProblem'
+              examples:
+                invalidCoordinatesAndValue:
+                  value:
+                    type: /problems/invalid-delivery-options-request
+                    title: Delivery options request is invalid
+                    status: 400
+                    detail: Correct the listed fields and retry.
+                    instance: /api/v1/delivery-options
+                    correlationId: 4b634e63-993f-40da-b475-aecdd2d5f4e7
+                    errors:
+                      - code: OUT_OF_RANGE
+                        detail: must be between -90 and 90
+                        source:
+                          pointer: '#/pickup/latitude'
+                      - code: GREATER_THAN_ZERO
+                        detail: must be greater than zero
+                        source:
+                          pointer: '#/orderValue'
+        '500':
+          description: A controlled internal configuration problem prevented ranking
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+components:
+  parameters:
+    CorrelationId:
+      name: X-Correlation-Id
+      in: header
+      required: false
+      description: >-
+        Optional business correlation value. One valid value is preserved exactly.
+        Omit it to receive a generated UUIDv4. Duplicate or malformed values cause
+        a validation problem correlated with a newly generated identifier.
+      schema:
+        $ref: '#/components/schemas/CorrelationId'
+  headers:
+    CorrelationId:
+      description: Correlation identifier returned in the response body as well
+      schema:
+        $ref: '#/components/schemas/CorrelationId'
+  schemas:
+    CorrelationId:
+      type: string
+      minLength: 1
+      maxLength: 128
+      pattern: '^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$'
+      examples:
+        - 7743bd70-52d1-4ef2-99dc-1b74d23c8975
+    OpaqueId:
+      type: string
+      minLength: 1
+      maxLength: 128
+      pattern: '.*\S.*'
+    ProviderId:
+      type: string
+      pattern: '^[A-Z][A-Z0-9_]{0,63}$'
+      examples:
+        - MOTO_EXPRESS
+    MoneyAmount:
+      type: number
+      format: decimal
+      minimum: 0
+      multipleOf: 0.01
+      examples:
+        - 12.90
+    PositiveMoneyAmount:
+      allOf:
+        - $ref: '#/components/schemas/MoneyAmount'
+        - exclusiveMinimum: 0
+    GeoPoint:
+      type: object
+      additionalProperties: false
+      required:
+        - latitude
+        - longitude
+      properties:
+        latitude:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+    DeliveryOptionsRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - restaurantId
+        - orderId
+        - orderValue
+        - pickup
+        - destination
+      properties:
+        restaurantId:
+          $ref: '#/components/schemas/OpaqueId'
+        orderId:
+          $ref: '#/components/schemas/OpaqueId'
+        orderValue:
+          $ref: '#/components/schemas/PositiveMoneyAmount'
+        pickup:
+          $ref: '#/components/schemas/GeoPoint'
+        destination:
+          $ref: '#/components/schemas/GeoPoint'
+    DeliveryOption:
+      type: object
+      additionalProperties: false
+      required:
+        - provider
+        - fee
+        - estimatedMinutes
+        - score
+      properties:
+        provider:
+          $ref: '#/components/schemas/ProviderId'
+        fee:
+          $ref: '#/components/schemas/MoneyAmount'
+        estimatedMinutes:
+          type: integer
+          format: int32
+          minimum: 1
+        score:
+          type: number
+          format: decimal
+          minimum: 0
+          maximum: 100
+          multipleOf: 0.01
+    CompleteDeliveryOptionsResult:
+      type: object
+      additionalProperties: false
+      required:
+        - correlationId
+        - currency
+        - options
+        - recommendedProvider
+        - unavailableProviders
+        - partialResult
+      properties:
+        correlationId:
+          $ref: '#/components/schemas/CorrelationId'
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          examples:
+            - BRL
+        options:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          description: >-
+            Ordered by score descending, estimated minutes ascending, fee
+            ascending, then provider ID using case-sensitive ASCII lexical order.
+          items:
+            $ref: '#/components/schemas/DeliveryOption'
+        recommendedProvider:
+          allOf:
+            - $ref: '#/components/schemas/ProviderId'
+          description: Must equal the provider in the first options element.
+        unavailableProviders:
+          type: array
+          maxItems: 0
+          items:
+            $ref: '#/components/schemas/ProviderId'
+        partialResult:
+          type: boolean
+          enum:
+            - false
+    Problem:
+      type: object
+      additionalProperties: true
+      required:
+        - type
+        - title
+        - status
+        - detail
+        - correlationId
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri-reference
+        correlationId:
+          $ref: '#/components/schemas/CorrelationId'
+    ErrorSource:
+      type: object
+      additionalProperties: false
+      required:
+        - pointer
+      properties:
+        pointer:
+          type: string
+          description: JSON Pointer into the request, beginning with `#/`.
+          pattern: '^#(/.*)?$'
+    FieldViolation:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+        - detail
+        - source
+      properties:
+        code:
+          type: string
+          pattern: '^[A-Z][A-Z0-9_]{0,63}$'
+        detail:
+          type: string
+          minLength: 1
+          maxLength: 256
+        source:
+          $ref: '#/components/schemas/ErrorSource'
+    ValidationProblem:
+      allOf:
+        - $ref: '#/components/schemas/Problem'
+        - type: object
+          required:
+            - errors
+          properties:
+            errors:
+              type: array
+              minItems: 1
+              description: Ordered by source pointer, then code.
+              items:
+                $ref: '#/components/schemas/FieldViolation'

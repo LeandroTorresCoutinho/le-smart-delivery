@@ -1,0 +1,169 @@
+openapi: 3.1.0
+info:
+  title: LeSmartDelivery Provider Quote API
+  version: 1.0.0
+  description: >-
+    Internal provider-facing quote contract used by orchestrator adapters. The
+    reusable simulator implements this contract in feature 001; real provider
+    integrations remain out of scope.
+servers:
+  - url: http://provider-simulator:8080
+    description: Internal service address; each configured instance has its own URL
+paths:
+  /api/v1/quotes:
+    post:
+      operationId: requestProviderQuote
+      summary: Return one provider delivery quote
+      parameters:
+        - $ref: '#/components/parameters/CorrelationId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderQuoteRequest'
+      responses:
+        '200':
+          description: A valid provider quote
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderQuoteResponse'
+              examples:
+                normalQuote:
+                  value:
+                    fee: 12.90
+                    currency: BRL
+                    estimatedMinutes: 28
+        '400':
+          description: Internal request validation failure
+          headers:
+            X-Correlation-Id:
+              $ref: '#/components/headers/CorrelationId'
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+components:
+  parameters:
+    CorrelationId:
+      name: X-Correlation-Id
+      in: header
+      required: true
+      description: Correlation identifier propagated unchanged by the orchestrator
+      schema:
+        $ref: '#/components/schemas/CorrelationId'
+  headers:
+    CorrelationId:
+      description: The request correlation identifier returned unchanged
+      schema:
+        $ref: '#/components/schemas/CorrelationId'
+  schemas:
+    CorrelationId:
+      type: string
+      minLength: 1
+      maxLength: 128
+      pattern: '^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$'
+    OpaqueId:
+      type: string
+      minLength: 1
+      maxLength: 128
+      pattern: '.*\S.*'
+    MoneyAmount:
+      type: number
+      format: decimal
+      minimum: 0
+      multipleOf: 0.01
+    PositiveMoneyAmount:
+      allOf:
+        - $ref: '#/components/schemas/MoneyAmount'
+        - exclusiveMinimum: 0
+    GeoPoint:
+      type: object
+      additionalProperties: false
+      required:
+        - latitude
+        - longitude
+      properties:
+        latitude:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+        longitude:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+    ProviderQuoteRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - restaurantId
+        - orderId
+        - orderValue
+        - currency
+        - pickup
+        - destination
+      properties:
+        restaurantId:
+          $ref: '#/components/schemas/OpaqueId'
+        orderId:
+          $ref: '#/components/schemas/OpaqueId'
+        orderValue:
+          $ref: '#/components/schemas/PositiveMoneyAmount'
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+          examples:
+            - BRL
+        pickup:
+          $ref: '#/components/schemas/GeoPoint'
+        destination:
+          $ref: '#/components/schemas/GeoPoint'
+    ProviderQuoteResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - fee
+        - currency
+        - estimatedMinutes
+      properties:
+        fee:
+          $ref: '#/components/schemas/MoneyAmount'
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        estimatedMinutes:
+          type: integer
+          format: int32
+          minimum: 1
+    Problem:
+      type: object
+      additionalProperties: true
+      required:
+        - type
+        - title
+        - status
+        - detail
+        - correlationId
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri-reference
+        correlationId:
+          $ref: '#/components/schemas/CorrelationId'
