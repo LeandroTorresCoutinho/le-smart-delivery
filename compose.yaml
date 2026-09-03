@@ -1,0 +1,98 @@
+name: le-smart-delivery
+
+x-build-metadata: &build-metadata
+  BUILD_DATE: ${BUILD_DATE:-1970-01-01T00:00:00Z}
+  IMAGE_VERSION: ${IMAGE_TAG:-local}
+  VCS_REF: ${GIT_COMMIT:-local}
+  SOURCE_URL: ${SOURCE_URL:-https://github.com/LeandroTorresCoutinho/le-smart-delivery}
+
+x-service-security: &service-security
+  cap_drop:
+    - ALL
+  pids_limit: 200
+  read_only: true
+  security_opt:
+    - no-new-privileges:true
+  tmpfs:
+    - /tmp:size=64m,noexec,nosuid
+
+x-service-resources: &service-resources
+  cpus: 0.75
+  mem_limit: 512m
+  mem_reservation: 256m
+
+x-healthcheck: &healthcheck
+  test:
+    - CMD
+    - wget
+    - --no-verbose
+    - --tries=1
+    - --spider
+    - http://localhost:8080/actuator/health
+  interval: 10s
+  timeout: 3s
+  retries: 10
+  start_period: 20s
+
+x-simulator: &simulator
+  <<:
+    - *service-security
+    - *service-resources
+  build:
+    context: .
+    dockerfile: provider-simulator/Dockerfile
+    args: *build-metadata
+  image: le-smart-delivery/provider-simulator:${IMAGE_TAG:-local}
+  expose:
+    - "8080"
+  healthcheck: *healthcheck
+  networks:
+    - delivery-internal
+  restart: unless-stopped
+
+services:
+  delivery-orchestrator:
+    <<:
+      - *service-security
+      - *service-resources
+    build:
+      context: .
+      dockerfile: delivery-orchestrator/Dockerfile
+      args: *build-metadata
+    image: le-smart-delivery/delivery-orchestrator:${IMAGE_TAG:-local}
+    ports:
+      - "127.0.0.1:${ORCHESTRATOR_PORT:-8080}:8080"
+    depends_on:
+      flash-delivery:
+        condition: service_healthy
+      city-courier:
+        condition: service_healthy
+      moto-express:
+        condition: service_healthy
+    healthcheck: *healthcheck
+    networks:
+      - delivery-edge
+      - delivery-internal
+    restart: unless-stopped
+
+  flash-delivery:
+    <<: *simulator
+    environment:
+      DELIVERY_SIMULATOR_PROVIDER_ID: FLASH_DELIVERY
+
+  city-courier:
+    <<: *simulator
+    environment:
+      DELIVERY_SIMULATOR_PROVIDER_ID: CITY_COURIER
+
+  moto-express:
+    <<: *simulator
+    environment:
+      DELIVERY_SIMULATOR_PROVIDER_ID: MOTO_EXPRESS
+
+networks:
+  delivery-edge:
+    name: le-smart-delivery-edge
+  delivery-internal:
+    name: le-smart-delivery-internal
+    internal: true

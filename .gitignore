@@ -5,10 +5,20 @@
 
 # Java and Maven build output
 target/
+build/
+out/
+.gradle/
 *.class
+*.jar
 
 # Logs and local runtime configuration
 *.log
 .env
 .env.*
 !.env.example
+
+# Editor and temporary files
+.vscode/
+*.tmp
+*.swp
+Thumbs.db

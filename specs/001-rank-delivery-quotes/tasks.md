@@ -18,14 +18,14 @@
 
 **Purpose**: Reconcile the governed stack, initialize the Maven reactor, and establish build/container quality gates.
 
-- [ ] T001 Reconcile the feature design with constitution 2.0.0 by replacing Spring Boot 3.5 compatibility work with Java 26 and Spring Boot 4.1.x decisions, updating the Resilience4j Boot 4 artifact, and normalizing the resilience dependency name in specs/001-rank-delivery-quotes/plan.md, specs/001-rank-delivery-quotes/research.md, and specs/001-rank-delivery-quotes/quickstart.md
-- [ ] T002 Create the Java 26 Maven reactor, Maven Wrapper, centralized dependency/plugin management, compiler rules, Surefire/Failsafe separation, formatting, static-analysis, Maven Enforcer, and dependency-check gates in pom.xml, mvnw, mvnw.cmd, and .mvn/wrapper/
-- [ ] T003 [P] Scaffold the Spring Boot 4.1.x orchestrator application and test source sets in delivery-orchestrator/pom.xml and delivery-orchestrator/src/main/java/com/lesmartdelivery/orchestrator/DeliveryOrchestratorApplication.java
-- [ ] T004 [P] Scaffold the Spring Boot 4.1.x simulator application and test source sets in provider-simulator/pom.xml and provider-simulator/src/main/java/com/lesmartdelivery/simulator/ProviderSimulatorApplication.java
-- [ ] T005 Pin `io.github.resilience4j:resilience4j-spring-boot4:2.4.0` directly rather than relying on its incomplete BOM entry, and verify the Boot 4.1.x configuration/registry integration in pom.xml
-- [ ] T006 [P] Add reproducible non-root Java 26 container builds with immutable-image metadata in delivery-orchestrator/Dockerfile, provider-simulator/Dockerfile, and .dockerignore
-- [ ] T007 Define one internal network, one public orchestrator, and three internal instances of the reusable simulator with finite resources and health checks in compose.yaml
-- [ ] T008 Add pull-request verification for the complete Maven reactor, integration tests, static analysis, dependency checks, and non-publishing image builds in .github/workflows/build.yml
+- [X] T001 Reconcile the feature design with constitution 2.0.0 by replacing Spring Boot 3.5 compatibility work with Java 26 and Spring Boot 4.1.x decisions, updating the Resilience4j Boot 4 artifact, and normalizing the resilience dependency name in specs/001-rank-delivery-quotes/plan.md, specs/001-rank-delivery-quotes/research.md, and specs/001-rank-delivery-quotes/quickstart.md
+- [X] T002 Create the Java 26 Maven reactor, Maven Wrapper, centralized dependency/plugin management, compiler rules, Surefire/Failsafe separation, formatting, static-analysis, Maven Enforcer, and dependency-check gates in pom.xml, mvnw, mvnw.cmd, and .mvn/wrapper/
+- [X] T003 [P] Scaffold the Spring Boot 4.1.x orchestrator application and test source sets in delivery-orchestrator/pom.xml and delivery-orchestrator/src/main/java/com/lesmartdelivery/orchestrator/DeliveryOrchestratorApplication.java
+- [X] T004 [P] Scaffold the Spring Boot 4.1.x simulator application and test source sets in provider-simulator/pom.xml and provider-simulator/src/main/java/com/lesmartdelivery/simulator/ProviderSimulatorApplication.java
+- [X] T005 Pin `io.github.resilience4j:resilience4j-spring-boot4:2.4.0` directly rather than relying on its incomplete BOM entry, and verify the Boot 4.1.x configuration/registry integration in pom.xml
+- [X] T006 [P] Add reproducible non-root Java 26 container builds with immutable-image metadata in delivery-orchestrator/Dockerfile, provider-simulator/Dockerfile, and .dockerignore
+- [X] T007 Define one internal network, one public orchestrator, and three internal instances of the reusable simulator with finite resources and health checks in compose.yaml
+- [X] T008 Add pull-request verification for the complete Maven reactor, integration tests, static analysis, dependency checks, and non-publishing image builds in .github/workflows/build.yml
 
 **Checkpoint**: The repository has two buildable application modules and constitution-aligned build/container gates.
 
